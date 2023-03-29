@@ -1,6 +1,3 @@
-#Programa IT Academy – Processo Seletivo – Edição #18
-#Nome do candidato: Pedro Christmann de Quadros
-
 #Importação das bibliotecas numpy,pandas e unidecode para auxiliar nas tarefas do programa.
 import numpy
 import pandas as pd
@@ -141,31 +138,27 @@ def cadastrar_transportes(cidades,objs):
         for i in range(len(objs[len(objs) - 1].lista_cidades)-1):
             for j in range(len(objs[len(objs)-1].objetos)):
                 if i+1 != (len(objs[len(objs) - 1].lista_cidades)-1):
-                    descarga = int(input('Quantas unidades de '+ objs[len(objs)-1].objetos[j]+' você deseja descarregar em '+ objs[len(objs) - 1].lista_cidades[i+1]+'?'))
+                    descarga = int(input('Quantas unidades de '+ objs[len(objs)-1].objetos[j]+' você deseja descarregar em '+ objs[len(objs) - 1].lista_cidades[i+1].upper()+'?\n'))
                     objs[len(objs) - 1].descargas[i,j] = descarga
                 objs[len(objs) - 1].peso_trecho[i] += (objs[len(objs)-1].quantidade_descarga[j]*objs[len(objs) - 1].pesos[j])
                 objs[len(objs) - 1].quantidade_descarga[j] = objs[len(objs) - 1].quantidade_descarga[j] - descarga
 
 
             # Declara variável para divisão de pesos por caminhões
-            peso_dividido = 0
+            peso_dividido = objs[len(objs) - 1].peso_trecho[i]
 
-            #Através da soma da variável, comparada com o peso carregado no trecho, verifica a melhor escolha de porte de caminhão a ser utilizada no trecho.
-            while peso_dividido < objs[len(objs) - 1].peso_trecho[i]:
-                if peso_dividido + 10000 <= objs[len(objs) - 1].peso_trecho[i]:
+
+            while peso_dividido >0:
+                if peso_dividido > 9200: #Peso acima do qual não vale mais a pena usar 2 caminhões médios
+                    peso_dividido = peso_dividido - 10000
                     objs[len(objs) - 1].grande[i] += 1
-                    peso_dividido += 10000
-                elif peso_dividido + 4000 <= objs[len(objs) - 1].peso_trecho[i]:
+                elif peso_dividido > 2400: #Peso acima do qual não vale mais a pena usar 2 caminhões pequenos
+                    peso_dividido = peso_dividido - 4000
                     objs[len(objs) - 1].medio[i] += 1
-                    peso_dividido += 4000
-                elif peso_dividido + 1000 <= objs[len(objs) - 1].peso_trecho[i]:
-                    objs[len(objs) - 1].pequeno[i] += 1
-                    peso_dividido += 1000
-                elif objs[len(objs) - 1].peso_trecho[i] - peso_dividido < 1000:
-                    objs[len(objs) - 1].pequeno[i] += 1
-                    break
                 else:
-                    break
+                    peso_dividido = peso_dividido - 1000
+                    objs[len(objs) - 1].pequeno[i] += 1
+
 
             #Calcula preço do trecho:
             objs[len(objs) - 1].preco_trecho[i] =round(((objs[len(objs) - 1].grande[i]*g_porte) +  (objs[len(objs) - 1].medio[i]*m_porte) + (objs[len(objs) - 1].pequeno[i]*p_porte)) * objs[len(objs)-1].distancias[i+1],2)
@@ -177,21 +170,22 @@ def cadastrar_transportes(cidades,objs):
 
         #Laço de repetição para relacionar todos os atributos do objeto colocados nos arrays e exibir as informações necessárias
         for i in range(len(objs[len(objs) - 1].lista_cidades)-1):
-            print('\nTrecho percorrido:\n',objs[len(objs) - 1].lista_cidades[i].upper(), '-', objs[len(objs) - 1].lista_cidades[i + 1].upper(), ':', objs[len(objs)-1].distancias[i + 1], 'km de distância.')
+            print('\nTRECHO PERCORRIDO:\n',objs[len(objs) - 1].lista_cidades[i].upper(), '-', objs[len(objs) - 1].lista_cidades[i + 1].upper(), ':', objs[len(objs)-1].distancias[i + 1], 'km de distância.')
+
             if i + 1 <= len(objs[len(objs) - 1].lista_cidades) - 1:
-                for j in range(len(objs[len(objs)-1].objetos)):
-                    if i + 1 == len(objs[len(objs) - 1].lista_cidades) - 1:
-                        print('\nO restante da carga foi descarregado em',objs[len(objs) - 1].lista_cidades[i+1])
-                        break
-                    else:
-                        print('Entre', objs[len(objs) - 1].lista_cidades[i],'e',objs[len(objs) - 1].lista_cidades[i+1],'foram descarregados',objs[len(objs) - 1].descargas[i,j], objs[len(objs)-1].objetos[j],'.' )
+                if i + 1 == len(objs[len(objs) - 1].lista_cidades) - 1:
+                    print('\nO restante da carga foi descarregado em', objs[len(objs) - 1].lista_cidades[i + 1])
+                else:
+                    print('\nEntre', objs[len(objs) - 1].lista_cidades[i], 'e', objs[len(objs) - 1].lista_cidades[i + 1],'foram descarregados:')
+                    for j in range(len(objs[len(objs)-1].objetos)):
+                        print(objs[len(objs) - 1].descargas[i,j], objs[len(objs)-1].objetos[j])
                 print('\nOs tipos de caminhões necessários foram:\nPequenos:',objs[len(objs) - 1].pequeno[i],'\nMédios:',objs[len(objs) - 1].medio[i],'\nGrandes:',objs[len(objs) - 1].grande[i],'\n')
                 print('O custo do trecho foi de R$',(objs[len(objs) - 1].preco_trecho[i]))
 
         #Calcula custo total da viagem e o preço médio unitário e os imprime:
         objs[len(objs) - 1].custo_total = numpy.sum(objs[len(objs) - 1].preco_trecho)
-        print('\nO custo total foi de R$',round(objs[len(objs) - 1].custo_total),2)
-        print('O custo unitário médio foi de:',round(objs[len(objs) - 1].custo_total/numpy.sum(objs[len(objs) - 1].quantidade)),2)
+        print('\nO custo total foi de R$',round(objs[len(objs) - 1].custo_total,2))
+        print('O custo unitário médio foi de:',round(objs[len(objs) - 1].custo_total/numpy.sum(objs[len(objs) - 1].quantidade),2))
 
     #Retorno de erro caso o usuário não colocar uma cidade presente no arquivo.
     else:
@@ -207,36 +201,36 @@ def estatisticas():
         for i in range(len(objs)):
 
             #Imprime as informações na tela com base nos atributos de cada objeto e com os devidos cálculos necessários.
-            print('CADASTRO Nº',i)
+            print('\nCADASTRO Nº',i+1)
 
-            print('\nCusto total:',round(objs[i].custo_total),2)
+            print('\nCusto total:',round(objs[i].custo_total,2))
 
-            print('Custo por trecho:')
+            print('\nCusto por trecho:')
             for j in range(len(objs[i].preco_trecho)):
                 if j + 1 < len(objs[i].lista_cidades):
                     print(objs[i].lista_cidades[j].upper(),'-',objs[i].lista_cidades[j+1].upper(),': R$:',objs[i].preco_trecho[j])
 
-            print('Custo médio por km: R$',round(objs[i].custo_total/objs[i].distancia_total))
+            print('\nCusto médio por km: R$',round(objs[i].custo_total/objs[i].distancia_total,2))
 
-            print('Custo médio por tipo de produto:')
+            print('\nCusto médio por tipo de produto:')
             for j in range(len(objs[i].objetos)):
                 print(objs[i].objetos[j], '- R$',round(objs[i].custo_total/objs[i].quantidade[j],2))
 
-            print('Custo total por trecho:')
+            print('\nCusto total por trecho:')
             cidade_anterior = 0
             for j in range(len(objs[i].preco_trecho)):
                 if j + 1 < len(objs[i].lista_cidades):
                     print(objs[i].lista_cidades[j].upper(),'-',objs[i].lista_cidades[j+1].upper(),': R$:',objs[i].preco_trecho[j] + cidade_anterior)
                     cidade_anterior = objs[i].preco_trecho[j]
 
-            print('Custo total por modalidade de transporte:')
+            print('\nCusto total por modalidade de transporte:')
             print('Caminhão de grande porte: R$',np.sum(objs[i].preco_modalidade_g))
             print('Caminhão de médio porte: R$', np.sum(objs[i].preco_modalidade_m))
             print('Caminhão de pequeno porte: R$', np.sum(objs[i].preco_modalidade_p))
 
-            print('Total de veículos deslocados:',np.sum(objs[i].grande)+np.sum(objs[i].medio)+np.sum(objs[i].pequeno))
+            print('\nTotal de veículos deslocados:',np.sum(objs[i].grande)+np.sum(objs[i].medio)+np.sum(objs[i].pequeno))
 
-            print('Total de produtos transportados:',np.sum(objs[i].quantidade))
+            print('\nTotal de produtos transportados:',np.sum(objs[i].quantidade))
 
     #Exibe mensagem notificando o usuário caso não haja transportes cadastrados
     else:
@@ -250,7 +244,7 @@ def menu():
 
         if escolha == 1:
             #Imprime rotas disponíveis:
-            print('Estes são os trechos disponíveis: ')
+            print('\nEstes são os trechos disponíveis: ')
             for i in range(len(df.columns)):
                 for j in range(len(df.columns)):
                     if df.columns[i] != df.columns[j]:
@@ -272,7 +266,7 @@ def menu():
             #Permite que usuário digite o destino:
             while True:
                 try:
-                    destino = input('Digite o destino:\n')
+                    destino = input('\nDigite o destino:\n')
                     if destino == 0:
                         print('Saindo do programa.')
                         exit()
@@ -289,7 +283,7 @@ def menu():
             #Permite que o usuário escolha o porte do caminhão através de um input de inteiro:
 
             while True:
-                porte_escolha = int(input('Qual o porte do caminhão?\n1 - Pequeno\n2 - Médio\n3 - Grande\n'))
+                porte_escolha = int(input('\nQual o porte do caminhão?Pressione 0 para sair do programa.\n1 - Pequeno\n2 - Médio\n3 - Grande\n'))
                 if porte_escolha == 1:
                     preco_porte = p_porte
                     porte = 'pequeno porte'
@@ -312,7 +306,7 @@ def menu():
             custo = preco_porte * trechos_modalidades(partida,destino)
 
             #Imprime informações:
-            print('A distância entre',partida.upper(),'e',destino.upper(),'é de',trechos_modalidades(partida, destino),'km.\nO custo total em um caminhão de',porte,'será de R$', round(custo,2),'\n')
+            print('\nA distância entre',partida.upper(),'e',destino.upper(),'é de',trechos_modalidades(partida, destino),'km.\nO custo total em um caminhão de',porte,'será de R$', round(custo,2),'\n')
 
             #Retorna ao menu:
             menu()
@@ -328,57 +322,60 @@ def menu():
 
                 #Pede para o usuário digitar a lista de cidades.
                 try:
-                    cidades = input('Para quais cidades você quer ir? Digite-as separadas apenas por vírgulas.Para sair do programa digite 0\n')
+                    cidades = input('\nPara quais cidades você quer ir? Digite-as separadas apenas por vírgulas.Para sair do programa digite 0\n')
                     if cidades == '0':
-                        print('Saindo do programa')
+                        print('\nSaindo do programa')
                         exit()
                 except ValueError:
                     print("\nPor favor, insira palavras que representem nomes de cidade separados apenas por vírgulas\n")
                     continue
-                #Coloca a lista no array do atributo "lista_cidades"
-                #objs[len(objs)-1].lista_cidades.append(cidades)
                 break
 
-            #Pede para o usuário digitar um objeto que queira adicionar ao transporte
             while True:
-                try:
-                    adicionar_obj = input('Que objeto quer colocar na lista? Digite um de cada vez. Para sair do programa digite 0.\n')
-                    if adicionar_obj == '0':
-                        print("Saindo do programa.")
-                        exit()
-                except ValueError:
-                    print('Por favor adicine um objeto válido.\n')
-                    continue
-                #Coloca objeto no array do atributo "objetos"
-                objs[len(objs) - 1].objetos.append(adicionar_obj)
-                break
+                #Pede para o usuário digitar um objeto que queira adicionar ao transporte
+                while True:
+                    try:
+                        adicionar_obj = input('\nQue objeto quer colocar na lista? Digite um de cada vez. Para sair do programa digite 0.\n')
+                        if adicionar_obj == '0':
+                            print("\nSaindo do programa.")
+                            exit()
+                    except ValueError:
+                        print('\nPor favor adicine um objeto válido.\n')
+                        continue
+                    #Coloca objeto no array do atributo "objetos"
+                    objs[len(objs) - 1].objetos.append(adicionar_obj)
+                    break
 
-            #Pede para o usuário digitar o peso do objeto
-            while True:
-                try:
-                    adicionar_peso = float(input('Qual o peso (em quilogramas) do objeto? Para sair do programa digite 0.\n '))
-                    if adicionar_peso == 0:
-                        print("Exiting the Program.")
-                        exit()
-                except ValueError:
-                    print('Por favor, adicione um peso válido.\n')
-                    continue
-                #Coloca o peso digitado no array do atributo "pesos"
-                objs[len(objs)-1].pesos.append(adicionar_peso)
-                break
+                #Pede para o usuário digitar o peso do objeto
+                while True:
+                    try:
+                        adicionar_peso = float(input('\nQual o peso (em quilogramas) do objeto? Para sair do programa digite 0.\n '))
+                        if adicionar_peso == 0:
+                            print("\nSaindo do programa.")
+                            exit()
+                    except ValueError:
+                        print('\nPor favor, adicione um peso válido.\n')
+                        continue
+                    #Coloca o peso digitado no array do atributo "pesos"
+                    objs[len(objs)-1].pesos.append(adicionar_peso)
+                    break
 
-            #Pede para o usuário digitar a quantidade do objeto digitado anteriormente
-            while True:
-                try:
-                    adicionar_quantidade = float(input('Qual a quantidade desse objeto? Para sair do programa digite 0\n'))
-                except ValueError:
-                    print('Por favor, adicione uma quantidade válida.\n')
-                    continue
-                #Coloca a quantidade desse objeto no array "quantidade"
-                objs[len(objs)-1].quantidade.append(adicionar_quantidade)
+                #Pede para o usuário digitar a quantidade do objeto digitado anteriormente
+                while True:
+                    try:
+                        adicionar_quantidade = float(input('\nQual a quantidade desse objeto? Para sair do programa digite 0\n'))
+                        if adicionar_quantidade == 0:
+                            print("\nSaindo do programa.")
+                            exit()
+                    except ValueError:
+                        print('\nPor favor, adicione uma quantidade válida.\n')
+                        continue
+                    #Coloca a quantidade desse objeto no array "quantidade"
+                    objs[len(objs)-1].quantidade.append(adicionar_quantidade)
+                    break
 
                 #Dá a possibilidade de o usuário escolher se quer continuar adicionando objetos
-                continuar = input('Deseja adicionar mais objetos? S ou N? Caso desejar sair do programa, qualquer outro valor\n')
+                continuar = input('\nDeseja adicionar mais objetos? S ou N? Caso desejar sair do programa, qualquer outro valor\n')
 
                 if continuar.lower() == 's':
                     pass
@@ -386,7 +383,7 @@ def menu():
                 elif continuar.lower() == 'n':
                     break
                 else:
-                    print("Saindo do programa.")
+                    print("\nSaindo do programa.")
                     exit()
 
             #Chama método de cadastrar transportes
@@ -409,7 +406,7 @@ def menu():
 
         #Se o usuário digitar um número fora das escolhas propostas, uma mensagem de erro aparece e o menu é exibido novamente.
         else:
-            print('Digite uma escolha válida')
+            print('\nDigite uma escolha válida\n')
 
 #Chama método do menu para a sua exibição inicial
 print('------SEJA BEM-VINDO!------')
